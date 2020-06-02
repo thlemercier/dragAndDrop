@@ -1,0 +1,204 @@
+@import "../../components/styleguide/color.module";
+@import "../../components/styleguide/font.module";
+
+$borderWidth: 2px;
+$panelWidth: 300px;
+$panelHeight: 170px;
+$panelHeightWithBorder: calc(#{$panelHeight} + (#{$borderWidth} * 2));
+$panelWidthWithBorder: calc(#{$panelWidth} + (#{$borderWidth} * 2));
+
+#dragImage {
+    position: fixed;
+    opacity: 0.7;
+    border: $borderWidth solid $colorPrimaryDark;
+    z-index: 2000;
+    &:before {
+        display: none !important;
+    }
+}
+
+// The Modal main container with the black overlay background
+.sectionReorderModal {
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,.85);
+    z-index: 1000;
+    position: fixed;
+    // This otherwise causing black overlay for TrendTable on zoom < 50%
+    transform: translate(-6000px, -6000px);
+    // Push the Modal main container in the middle of the screen
+    &.visible {
+        transform: translate(0, 0);
+    }
+
+    .closeIcon {
+        top: 3vh;
+        right: 4vw;
+        position: absolute;
+        z-index: 3;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    // The modal white background content showing in the middle of screen
+    #sectionReorderModalContent {
+        width: 90vw;
+        height: auto;
+        max-height: 90vh;
+        background: #FFF;
+        margin: 5vh 5vw;
+        overflow: auto;
+        border-radius: .28571429rem;
+        position: relative;
+        &.isLoading {
+            overflow: hidden;
+        }
+
+        .loadingState {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7);
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+        }
+
+        .stickyBar {
+            background: #fff;
+            position: sticky;
+            z-index: 1;
+            padding: 1.25rem 1.5rem;
+        }
+
+        header {
+            top: 0;
+        }
+
+        footer {
+            text-align: right;
+            bottom: 0;
+        }
+
+        #reoderingContainer {
+            padding: 1.85rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, calc(#{$panelWidth}));
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            grid-gap: 32px 20px;
+        }
+    }
+}
+// The class section has to be outside because it is used in by #dragImage which is directly under <body>
+.section { // Draggable element
+    position: relative;
+    width: $panelWidthWithBorder;
+    height: $panelHeightWithBorder;
+    transform: translateZ(0);
+
+    // used to have the drop effect fading off border
+    border: $borderWidth solid rgba(0, 0, 0, 0.1);
+    transition: border .3s linear;
+    &.isMoving {
+        border: $borderWidth solid $colorPrimaryDark;
+    }
+
+    .panelName {
+        width: $panelWidth;
+        height: 18px;
+        position: absolute;
+        top: -24px;
+        left: 0;
+        z-index: 3;
+        padding-left: #{$borderWidth};
+        white-space: nowrap;
+        font-size: $smallFontSize;
+    }
+
+    > * {
+        user-select: none;
+    }
+    > div { // Both .sectionClickableArea & the <ReportRenderer />
+        z-index: 2;
+        width: $panelWidth;
+        height: $panelHeight;
+        overflow: hidden;
+        &.sectionClickableArea {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 3;
+            cursor: move;
+        }
+        > div {
+            width: $panelWidth;
+            height: $panelHeight;
+            > div {
+                // Logic to scale the size of the panel
+                width: calc(#{$panelWidth} / 0.375) !important;
+                height: calc(#{$panelHeight} / 0.375) !important;
+                transform: scale(0.375) translate(-83%, -83%);
+            }
+        }
+    }
+
+    &.sectionBeingDragged { // Specific styles for the panel we are duplicating
+        border-color: $colorPrimaryDark;
+    }
+    &.isDuplicated:after { // The New banner at the top of the panel
+        content: 'New';
+        position: absolute;
+        height: 25px;
+        line-height: 25px;
+        width: 100%;
+        background: rgba(135, 56, 144, 0.8);
+        top: 0;
+        left: 0;
+        z-index: 5;
+        text-align: center;
+        color: white;
+        font-weight: bold
+    }
+    &.sectionHovered {
+        transition: transform 0.2s ease;
+        &.hoverLeft {
+            transform: translateX(10px);
+            &:before {
+                content: '';
+                position: absolute;
+                width: 4px;
+                background: $colorPrimaryDark;
+                height: 100%;
+                top:0;
+                left: 0;
+                opacity: 0.4;
+                transform: translate3d(-15px, 0, 10px);
+                border-radius: 4px;
+            }
+        }
+        &.hoverRight {
+            transform: translateX(-10px);
+            &:after {
+                content: '';
+                position: absolute;
+                width: 4px;
+                background: $colorPrimaryDark;
+                height: 100%;
+                top:0;
+                right: 0;
+                opacity: 0.4;
+                transform: translate3d(15px, 0, 10px);
+                border-radius: 4px;
+            }
+        }
+    }
+}
